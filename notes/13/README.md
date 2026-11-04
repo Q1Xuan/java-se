@@ -148,9 +148,71 @@ class MemberExample {
 }
 ```
 
-汉堡练习用私有 `Item` 表示套餐组成，用 `Burger` 继承 `Item`，并由 `Meal` 把添加配料的操作交给 `Burger`。嵌套关系允许访问私有成员，但不会改变继承规则：父类的私有字段不会作为子类成员被继承。配料枚举及其私有方法展示了嵌套类型的封装；内部类静态成员的版本限制见上文。
+### 汉堡练习：继承与委托
 
-播放列表练习用 `SongList` 封装歌曲集合和查找操作，再由 `Album` 调用它。练习的在线评测明确要求将 `SongList` 声明为 `public static`；这时它是静态嵌套类，不需要外部 `Album` 对象。该声明是评测的特殊要求，不是 Java 对成员内部类的一般要求；在普通代码中可根据是否需要关联外部对象及访问范围选择声明。
+下面是提炼后的例子：`Meal` 把添加配料交给 `Burger`。
+
+```java
+class Meal {
+    private enum Topping { CHEESE, TOMATO }
+
+    private class Item {
+        private String name = "汉堡";
+    }
+
+    private class Burger extends Item {
+        void add(Topping topping) {
+            // System.out.println(name); // 错误：private 字段不会被子类继承
+            System.out.println(((Item) this).name + " + " + topping); // 通过 Item 引用访问
+        }
+    }
+
+    private Burger burger = new Burger();
+
+    void addCheese() {
+        burger.add(Topping.CHEESE); // Meal 委托给 Burger
+    }
+
+    public static void main(String[] args) {
+        new Meal().addCheese(); // 汉堡 + CHEESE
+    }
+}
+```
+
+这里 `Burger` 能通过 `Item` 引用访问 `name`，是因为它们都嵌套在 `Meal` 中；这不代表私有字段被继承。
+
+### 播放列表练习：静态嵌套类
+
+练习要求 `SongList` 声明为 `public static`。它包装歌曲集合，`Album` 通过对象调用它：
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+class Album {
+    public static class SongList {
+        private List<String> songs = new ArrayList<>();
+
+        void add(String title) { songs.add(title); }
+        boolean contains(String title) { return songs.contains(title); }
+    }
+
+    private SongList songs = new SongList();
+    void addSong(String title) { songs.add(title); }
+
+    public static void main(String[] args) {
+        Album album = new Album();
+        album.addSong("Yesterday");
+        System.out.println(album.songs.contains("Yesterday")); // true
+
+        Album.SongList list = new Album.SongList(); // 不需要 Album 对象
+        list.add("Hello");
+        System.out.println(list.contains("Hello")); // true
+    }
+}
+```
+
+`public static` 是这道题的评测要求；其他场景可根据是否需要外部对象选择静态嵌套类或成员内部类。
 
 ## 局部类与局部变量
 
@@ -190,7 +252,7 @@ class LocalExample {
 
 在静态方法中也可以声明局部类，但访问外部类的实例字段时，需要提供外部类对象。类名不能在块外使用，对象仍可能通过其他类型的引用继续使用。
 
-课程用局部类包装员工、增加派生名称并实现 `Comparable`，以便在方法中排序。作用域和捕获规则见 [Java 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3) 和 [§6.5.6.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.5.6.1)。
+作用域和捕获规则见 [Java 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3) 和 [§6.5.6.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.5.6.1)。
 
 Java 16 起可在块中声明局部 `interface` 和 `enum`，`record` 也在 Java 16 正式引入（此前有预览版本）。这些局部类型隐式为静态，不属于内部类，也不能捕获外层局部变量；参见 [Java 16 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se16/html/jls-14.html#jls-14.3) 和 [JEP 395](https://openjdk.org/jeps/395)。
 
@@ -241,8 +303,70 @@ cat.speak(); // 喵
 
 匿名类捕获局部变量的规则与局部类相同。同一个创建表达式每次执行都可创建新对象；实例上下文中也可访问外部对象的成员。
 
-`Comparator` 把排序规则与被比较对象分开：`compare(a, b)` 返回负数、零或正数，分别表示 `a` 排在 `b` 前、两者排序相等或排在后。可用普通类、静态嵌套类、成员内部类、局部类或匿名类实现；成员内部类的创建需要外部对象。`Comparable` 则由对象类型定义自然顺序。
+`Comparator` 把排序规则放在对象外面。下面按字符串长度排序：
 
-`Comparator` 是函数式接口，可以用 Lambda 简写，例如 `(a, b) -> a.compareTo(b)`；Lambda 不声明匿名类，且其中的 `this` 指外层的 `this`，匿名类中的 `this` 指匿名类对象。需要继承类或使用自己的字段、多个方法时，可考虑匿名类。Lambda 从 Java 8 起可用；详见 [Java 语言规范 §15.9.5](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.9.5)、[§15.27.2](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.27.2) 和 [Comparator API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html)。
+```java
+List<String> names = new ArrayList<>(List.of("Lin", "Ada", "Bo"));
+names.sort((a, b) -> Integer.compare(a.length(), b.length()));
+System.out.println(names); // [Bo, Lin, Ada]
+```
 
-综合练习中，局部类通过组合保存原来的员工 `record`，并增加全名、工作年数等派生信息；匿名比较器捕获排序字段，按姓名或工作年数比较包装对象，再对列表排序。课程以当前年份减入职年份估算工作年数，这不是按完整入职周年计算的精确工龄。
+`compare(a, b)` 返回负数、零、正数，分别表示 `a` 排在前面、两者排序相等、`a` 排在后面。上面的 Lambda 是比较器的简写；`Comparable` 则由对象类型自己定义自然顺序。
+
+匿名类和 Lambda 的 `this` 也不同：
+
+```java
+class Demo {
+    void show() {
+        Runnable anonymous = new Runnable() {
+            public void run() {
+                System.out.println(this.getClass().getName()); // 匿名类对象
+            }
+        };
+        Runnable lambda = () -> System.out.println(this.getClass().getName()); // Demo 对象
+        anonymous.run();
+        lambda.run();
+    }
+}
+```
+
+Lambda 从 Java 8 起可用。匿名类还可以继承类或声明自己的字段；参见 [Java 语言规范 §15.9.5](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.9.5)、[§15.27.2](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.27.2) 和 [Comparator API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html)。
+
+### 综合练习：局部类包装员工并排序
+
+下面将员工 `record` 包装为局部类，再用匿名比较器按姓名排序：
+
+```java
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+class EmployeeSort {
+    record Employee(String first, String last, int startYear) { }
+
+    static void show() {
+        class EmployeeView {
+            Employee employee;
+            EmployeeView(Employee employee) { this.employee = employee; }
+            String fullName() { return employee.first() + " " + employee.last(); }
+            int years(int year) { return year - employee.startYear(); }
+        }
+
+        List<EmployeeView> people = new ArrayList<>(List.of(
+                new EmployeeView(new Employee("Lin", "Zhang", 2020)),
+                new EmployeeView(new Employee("Ada", "Li", 2018))));
+        people.sort(new Comparator<EmployeeView>() {
+            public int compare(EmployeeView a, EmployeeView b) {
+                return a.fullName().compareTo(b.fullName());
+            }
+        });
+        for (EmployeeView person : people) {
+            System.out.println(person.fullName() + ": " + person.years(2024));
+        }
+    }
+
+    public static void main(String[] args) { show(); }
+}
+```
+
+输出依次为 `Ada Li: 6`、`Lin Zhang: 4`。这里用年份相减估算工作年数，不是按完整入职周年计算。
