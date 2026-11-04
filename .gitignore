@@ -1,0 +1,13 @@
+# 原始课程资料保留在仓库之外
+*.pptx
+*.vtt
+*.pdf
+*.html
+*Source-code*.txt
+*_Notes.md
+*_Knowledge_Points.md
+
+# 本地临时文件与编译输出
+.DS_Store
+*.class
+.tmp/
