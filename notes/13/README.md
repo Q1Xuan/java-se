@@ -1,6 +1,6 @@
 # 第 13 模块：嵌套类
 
-本页目前覆盖分类、静态嵌套类和成员内部类；其他主题待整理。
+本页目前覆盖分类、静态嵌套类、成员内部类和局部类；匿名类等主题待整理。
 
 ## 四种形式
 
@@ -90,3 +90,36 @@ class InnerExample {
 汉堡练习用私有 `Item` 表示套餐组成，用 `Burger` 继承 `Item`，并由 `Meal` 把添加配料的操作交给 `Burger`。嵌套关系允许访问私有成员，但不会改变继承规则：父类的私有字段不会作为子类成员被继承。配料枚举及其私有方法展示了嵌套类型的封装；内部类静态成员的版本限制见上文。
 
 播放列表练习用 `SongList` 封装歌曲集合和查找操作，再由 `Album` 调用它。练习的在线评测明确要求将 `SongList` 声明为 `public static`；这时它是静态嵌套类，不需要外部 `Album` 对象。该声明是评测的特殊要求，不是 Java 对成员内部类的一般要求；在普通代码中可根据是否需要关联外部对象及访问范围选择声明。
+
+## 局部类与局部变量
+
+- 局部类是在代码块中声明的具名类，常见于方法、构造器或初始化块。类名从声明处起在所在块内可用，包括嵌套块；块外不能用这个名字。对象仍可能通过其他类型的引用在块结束后继续使用。
+- 局部类不能声明为 `public`、`protected`、`private` 或显式 `static`；它可以继承类、实现接口，也可以有私有成员。所在的外层代码可通过对象访问这些私有成员。
+- 在实例上下文声明的普通局部类，其实例代码可以访问外部对象的成员，包括私有成员；在静态上下文中没有当前外部对象，只能直接使用外部类的静态成员。要访问实例成员，需要另有外部对象。
+- 局部类使用所在作用域的局部变量或方法参数，称为捕获。编译器必须能确定被捕获的变量在读取前已经赋值，而且它必须是 `final` 或 effectively final（实际不可变）。
+- `final` 明确要求变量赋值后不能再赋值；effectively final 指没有写 `final`，但按代码的赋值情况，同样可以加上 `final` 而不违反赋值规则。即使重新赋值写在类声明之后，也会破坏这一条件。
+- 对引用变量来说，限制的是引用不能重新指向别的对象；如果对象本身可变，仍可调用方法修改它的内容。
+
+```java
+class LocalExample {
+    private int base = 10;
+
+    void show(String prefix) {
+        StringBuilder text = new StringBuilder(prefix); // effectively final
+        class Message {
+            private String value() { return text.toString() + base; }
+        }
+        text.append(": ");                 // 修改对象，不是重给 text 赋值
+        System.out.println(new Message().value()); // Hi: 10
+        // text = new StringBuilder();    // 重新赋值，捕获 text 的代码不能编译
+    }
+
+    public static void main(String[] args) {
+        new LocalExample().show("Hi");
+    }
+}
+```
+
+课程用局部类包装员工、增加派生名称并实现 `Comparable`，以便在方法中排序；排序的其他方式留待比较器主题。作用域和捕获规则见 [Java 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3) 和 [§6.5.6.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.5.6.1)。
+
+Java 16 起可在块中声明局部 `interface` 和 `enum`，`record` 也在 Java 16 正式引入（此前有预览版本）。这些局部类型隐式为静态，不属于内部类，也不能捕获外层局部变量；参见 [Java 16 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se16/html/jls-14.html#jls-14.3) 和 [JEP 395](https://openjdk.org/jeps/395)。
