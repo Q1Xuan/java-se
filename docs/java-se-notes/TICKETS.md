@@ -9,7 +9,7 @@
 | 任务 | GitHub issue | 阻塞任务 | 状态 |
 | --- | --- | --- | --- |
 | T13-01 | [#2：第 13 模块：静态嵌套类与基本分类](https://github.com/Q1Xuan/java-se/issues/2) | 无 | 进行中（待审查） |
-| T13-02 | [#3：第 13 模块：成员内部类与相关练习](https://github.com/Q1Xuan/java-se/issues/3) | 无，可立即开始 | 待开始 |
+| T13-02 | [#3：第 13 模块：成员内部类与相关练习](https://github.com/Q1Xuan/java-se/issues/3) | 无 | 已完成（本地，待合并） |
 | T13-03 | [#4：第 13 模块：局部类与局部变量限制](https://github.com/Q1Xuan/java-se/issues/4) | 无，可立即开始 | 待开始 |
 | T13-04 | [#5：第 13 模块：匿名类、比较器与综合练习](https://github.com/Q1Xuan/java-se/issues/5) | 无，可立即开始 | 待开始 |
 | T13-05 | [#6：第 13 模块：整合知识清单并确认样稿风格](https://github.com/Q1Xuan/java-se/issues/6) | #2、#3、#4、#5 | 待开始 |
