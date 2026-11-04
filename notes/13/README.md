@@ -48,7 +48,36 @@ class StaticExample {
 
 在外部使用 `Employee.Inspector` 时，仍须满足访问权限。
 
-例如，把比较器放进员工类后，它可以通过传入的员工对象读取私有字段，而不必为排序专门增加 getter。比较器的其他写法见下文。
+例如，按入职年份排序时，静态嵌套比较器可以直接读取员工的私有字段：
+
+```java
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+class Employee {
+    private int year;
+
+    Employee(int year) { this.year = year; }
+
+    static class YearComparator implements Comparator<Employee> {
+        public int compare(Employee a, Employee b) {
+            return Integer.compare(a.year, b.year); // 通过员工对象读取私有字段
+        }
+    }
+
+    public static void main(String[] args) {
+        List<Employee> employees = new ArrayList<>(List.of(
+                new Employee(2020), new Employee(2018)));
+        employees.sort(new YearComparator());
+        for (Employee employee : employees) {
+            System.out.println(employee.year); // 依次输出 2018、2020
+        }
+    }
+}
+```
+
+`year` 不需要为了排序而增加 getter。比较器的其他写法见下文。
 
 Java 16 起内部类可以声明静态成员和静态初始化器；此前内部类声明静态成员有更严格的限制。详见 [Java 语言规范 §8.1.3](https://docs.oracle.com/javase/specs/jls/se16/html/jls-8.html#jls-8.1.3)。
 
