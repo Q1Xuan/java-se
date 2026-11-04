@@ -1,6 +1,6 @@
 # 第 13 模块：嵌套类
 
-本页目前覆盖分类、静态嵌套类、成员内部类和局部类；匿名类等主题待整理。
+本页覆盖静态嵌套类、成员内部类、局部类和匿名类；全章整合与样稿风格待确认。
 
 ## 四种形式
 
@@ -49,7 +49,7 @@ class Example {
 }
 ```
 
-例如，把比较器放进员工类后，它可以通过传入的员工对象读取私有字段，而不必为排序专门增加 getter。比较器与排序的其他用法后续整理。
+例如，把比较器放进员工类后，它可以通过传入的员工对象读取私有字段，而不必为排序专门增加 getter。比较器的其他写法见下文。
 
 Java 16 起内部类可以声明静态成员和静态初始化器；此前内部类声明静态成员有更严格的限制。详见 [Java 语言规范 §8.1.3](https://docs.oracle.com/javase/specs/jls/se16/html/jls-8.html#jls-8.1.3)。
 
@@ -120,6 +120,45 @@ class LocalExample {
 }
 ```
 
-课程用局部类包装员工、增加派生名称并实现 `Comparable`，以便在方法中排序；排序的其他方式留待比较器主题。作用域和捕获规则见 [Java 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3) 和 [§6.5.6.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.5.6.1)。
+课程用局部类包装员工、增加派生名称并实现 `Comparable`，以便在方法中排序。作用域和捕获规则见 [Java 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3) 和 [§6.5.6.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.5.6.1)。
 
 Java 16 起可在块中声明局部 `interface` 和 `enum`，`record` 也在 Java 16 正式引入（此前有预览版本）。这些局部类型隐式为静态，不属于内部类，也不能捕获外层局部变量；参见 [Java 16 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se16/html/jls-14.html#jls-14.3) 和 [JEP 395](https://openjdk.org/jeps/395)。
+
+## 匿名类与比较器
+
+- 匿名类没有类名，通过 `new 类型(参数) { 类体 }` 在表达式中声明类并创建对象。表达式可赋给变量，也可直接作为方法参数；赋值语句以分号结束。
+- `new` 后写的是要继承的类或要实现的接口，不是匿名类的名字。匿名类继承指定类，或实现指定接口；实现接口时仍须实现其未实现的抽象方法。
+- 匿名类不能显式声明构造器；继承类时可向可访问的父类构造器传参，也可用实例初始化块执行初始化。不能继承 `final` 类，例如 `record`。
+- 匿名类捕获局部变量和方法参数时，与局部类一样要求变量已赋值且为 `final` 或 effectively final；引用对象的内容仍可修改。实例上下文中可访问外部对象的成员。
+- 具名局部类可在作用域内多次用类名创建对象；匿名类不能通过类名再次创建，但同一个创建表达式每次执行都可创建新对象。一次性定制行为时可用匿名类。
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
+class AnonymousExample {
+    static void sort(List<String> names, boolean reverse) {
+        Comparator<String> order = new Comparator<String>() {
+            @Override
+            public int compare(String a, String b) {
+                return reverse ? b.compareTo(a) : a.compareTo(b);
+            }
+        };
+        names.sort(order);
+    }
+
+    public static void main(String[] args) {
+        List<String> names = new ArrayList<>(Arrays.asList("Lin", "Ada"));
+        sort(names, false);
+        System.out.println(names); // [Ada, Lin]
+    }
+}
+```
+
+`Comparator` 把排序规则与被比较对象分开：`compare(a, b)` 返回负数、零或正数，分别表示 `a` 排在 `b` 前、两者排序相等或排在后。可用普通类、静态嵌套类、成员内部类、局部类或匿名类实现；成员内部类的创建需要外部对象。`Comparable` 则由对象类型定义自然顺序。
+
+`Comparator` 是函数式接口，可以用 Lambda 简写，例如 `(a, b) -> a.compareTo(b)`；Lambda 不声明匿名类，且其中的 `this` 指外层的 `this`，匿名类中的 `this` 指匿名类对象。需要继承类或使用自己的字段、多个方法时，可考虑匿名类。Lambda 从 Java 8 起可用；详见 [Java 语言规范 §15.9.5](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.9.5)、[§15.27.2](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.27.2) 和 [Comparator API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html)。
+
+综合练习中，局部类通过组合保存原来的员工 `record`，并增加全名、工作年数等派生信息；匿名比较器捕获排序字段，按姓名或工作年数比较包装对象，再对列表排序。课程以当前年份减入职年份估算工作年数，这不是按完整入职周年计算的精确工龄。
