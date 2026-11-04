@@ -19,37 +19,34 @@ flowchart TD
 
 ## 静态嵌套类
 
-- 在外部类的类体中用 `static class` 声明；在外部使用时可用 `外部类.嵌套类` 指定类型，仍需遵守访问权限。
-- 嵌套类可以直接访问外部类的静态成员，包括私有成员。它没有自动关联的外部类实例；访问外部实例成员时，需要提供外部类对象。
-- 外部类也可以访问嵌套类的私有成员；访问实例成员同样需要相应的嵌套类对象。
+用 `static class` 声明；创建时不需要 `Employee` 对象：
 
 ```java
 class Employee {
     private static String company = "Acme";
-    private int year;
-
-    Employee(int year) { this.year = year; }
+    private int year = 2020;
 
     static class Inspector {
         private int marker = 1;
 
-        String company() { return Employee.company; }
-        int yearOf(Employee employee) { return employee.year; }
-        // int year() { return year; } // 无外部对象，不能编译
+        String company() { return Employee.company; } // 直接访问外部类的静态字段
+        int yearOf(Employee employee) { return employee.year; } // 通过对象访问实例字段
+        // int year() { return year; } // 错误：没有 Employee 对象
     }
 
-    int markerOf(Inspector inspector) { return inspector.marker; }
+    int markerOf(Inspector inspector) { return inspector.marker; } // 通过对象访问私有字段
 }
 
-class Example {
+class StaticExample {
     public static void main(String[] args) {
         Employee.Inspector inspector = new Employee.Inspector();
-        Employee employee = new Employee(2020);
-        System.out.println(inspector.company());
-        System.out.println(inspector.yearOf(employee));
+        System.out.println(inspector.company());                  // Acme
+        System.out.println(inspector.yearOf(new Employee()));    // 2020
     }
 }
 ```
+
+在外部使用 `Employee.Inspector` 时，仍须满足访问权限。
 
 例如，把比较器放进员工类后，它可以通过传入的员工对象读取私有字段，而不必为排序专门增加 getter。比较器的其他写法见下文。
 
@@ -57,7 +54,36 @@ Java 16 起内部类可以声明静态成员和静态初始化器；此前内部
 
 ## 成员内部类
 
-在外部类的类体中声明非静态类，就是成员内部类。它可以使用 `public`、`protected`、`private` 或包访问权限。
+### 声明和创建
+
+```java
+class Meal {
+    class Item { } // 没有 static：成员内部类
+
+    Item createItem() {
+        return new Item(); // 在 Meal 的实例方法中，关联当前 Meal 对象
+    }
+
+    static Item createInStaticMethod(Meal meal) {
+        // return new Item(); // 错误：静态方法没有当前 Meal 对象
+        return meal.new Item(); // 提供一个 Meal 对象
+    }
+}
+```
+
+在其他类中创建：
+
+```java
+Meal meal = new Meal();
+Meal.Item item = meal.new Item(); // 外部类.内部类 对象名 = 外部对象.new 内部类();
+// Meal.Item item = new Meal.Item(); // 错误：缺少 Meal 对象
+```
+
+成员内部类可以使用 `public`、`protected`、`private` 或包访问权限；在外部使用时须满足对应权限。
+
+### 访问内外类的成员
+
+下面的 `Item` 关联一个 `Meal`。两个类都有 `price`，所以用 `this` 区分：
 
 ```java
 class Meal {
@@ -66,25 +92,32 @@ class Meal {
     class Item {
         private int price = 2;
 
-        int total() {
-            return this.price + Meal.this.price; // 内部类的 price + 外部类的 price
+        void printPrices() {
+            System.out.println(this.price);      // 2：Item 的 price
+            System.out.println(Meal.this.price); // 5：关联的 Meal 的私有 price
         }
     }
 
-    Item createItem() { return new Item(); } // 关联当前 Meal 对象
-    int itemPrice(Item item) { return item.price; } // 通过对象访问内部类的私有成员
+    void printItemPrice(Item item) {
+        System.out.println(item.price); // 2：通过 Item 对象访问它的私有 price
+    }
+
+    static void printMealPrice(Meal meal) {
+        // System.out.println(price); // 错误：静态方法没有当前 Meal 对象
+        System.out.println(meal.price); // 5：通过提供的对象访问
+    }
+}
+
+class MemberExample {
+    public static void main(String[] args) {
+        Meal meal = new Meal();
+        Meal.Item item = meal.new Item();
+        item.printPrices();        // 依次输出 2、5
+        meal.printItemPrice(item); // 2
+        Meal.printMealPrice(meal); // 5
+    }
 }
 ```
-
-在外部创建时，先创建外部类对象，再用它创建内部类对象：
-
-```java
-Meal meal = new Meal();
-Meal.Item item = meal.new Item(); // 外部类.内部类 对象名 = 外部对象.new 内部类();
-System.out.println(item.total()); // 7
-```
-
-内部类可直接访问关联的外部对象的私有成员；同名时，用 `this.price` 和 `Meal.this.price` 区分。外部类也可通过内部类对象访问其私有成员。静态上下文没有当前外部对象，创建内部类或访问实例成员时需要提供相应对象；外部访问还须满足访问权限。
 
 汉堡练习用私有 `Item` 表示套餐组成，用 `Burger` 继承 `Item`，并由 `Meal` 把添加配料的操作交给 `Burger`。嵌套关系允许访问私有成员，但不会改变继承规则：父类的私有字段不会作为子类成员被继承。配料枚举及其私有方法展示了嵌套类型的封装；内部类静态成员的版本限制见上文。
 
@@ -92,7 +125,17 @@ System.out.println(item.total()); // 7
 
 ## 局部类与局部变量
 
-局部类在代码块中声明，类名从声明处起只在所在块内可用。它可以继承类、实现接口，但不能声明访问权限修饰符或显式声明为 `static`。
+局部类在代码块中声明，类名从声明处起只在所在块内可用：
+
+```java
+void show() {
+    class Message { }
+    Message message = new Message(); // 可以在这个块内使用
+}
+// Message message = new Message(); // 错误：块外找不到 Message
+```
+
+它可以继承类、实现接口，但不能声明访问权限修饰符或显式声明为 `static`。
 
 局部类可以访问外部对象的私有成员；捕获局部变量时，变量必须已赋值，且是 `final` 或 effectively final（没有写 `final`，但赋值情况符合 `final` 的要求）：
 
@@ -103,10 +146,10 @@ class LocalExample {
     void show(String prefix) {
         StringBuilder text = new StringBuilder(prefix); // effectively final
         class Message {
-            private String value() { return text.toString() + base; }
+            private String value() { return text.toString() + base; } // 捕获 text，访问外部对象的 base
         }
         text.append(": ");                 // 修改对象，不是重给 text 赋值
-        System.out.println(new Message().value()); // Hi: 10
+        System.out.println(new Message().value()); // Hi: 10；外层通过对象访问私有方法
         // text = new StringBuilder();    // 重新赋值，捕获 text 的代码不能编译
     }
 
@@ -116,7 +159,7 @@ class LocalExample {
 }
 ```
 
-在静态上下文中没有当前外部对象，访问外部实例成员需要另有对象。局部类可以有私有成员，外层代码可通过对象访问；虽然类名不能在块外使用，对象仍可能通过其他类型的引用继续使用。
+在静态方法中也可以声明局部类，但访问外部类的实例字段时，需要提供外部类对象。类名不能在块外使用，对象仍可能通过其他类型的引用继续使用。
 
 课程用局部类包装员工、增加派生名称并实现 `Comparable`，以便在方法中排序。作用域和捕获规则见 [Java 语言规范 §14.3](https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3) 和 [§6.5.6.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.5.6.1)。
 
@@ -151,7 +194,21 @@ class AnonymousExample {
 }
 ```
 
-匿名类也可以继承一个类：`new 父类(参数) { ... }`。它不能显式声明构造器，但可以向可访问的父类构造器传参或使用实例初始化块；不能继承 `final` 类。实现接口时须实现未实现的抽象方法。
+匿名类也可以继承类，参数传给父类构造器：
+
+```java
+class Animal {
+    Animal(String name) { System.out.println(name); }
+    void speak() { }
+}
+
+Animal cat = new Animal("Mimi") { // 调用 Animal 的构造器
+    @Override void speak() { System.out.println("喵"); }
+};
+cat.speak(); // 喵
+```
+
+匿名类不能显式声明构造器，但可以使用实例初始化块；不能继承 `final` 类。实现接口时须实现未实现的抽象方法。
 
 匿名类捕获局部变量的规则与局部类相同。同一个创建表达式每次执行都可创建新对象；实例上下文中也可访问外部对象的成员。
 
