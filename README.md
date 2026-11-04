@@ -5,7 +5,7 @@
 当前处于准备阶段：先完成第 13 模块“嵌套类、局部类与匿名类”样稿，确认风格后，再按课程顺序逐章整理。
 
 - [需求规格](docs/java-se-notes/SPEC.md) · [Spec issue #1](https://github.com/Q1Xuan/java-se/issues/1)
-- [任务清单](docs/java-se-notes/TICKETS.md)
+- [任务清单](docs/java-se-notes/TICKETS.md) · [下一任务 #2](https://github.com/Q1Xuan/java-se/issues/2)
 - [进度与接续](docs/java-se-notes/PROGRESS.md)
 - [项目术语](GLOSSARY.md)
 
