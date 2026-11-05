@@ -23,12 +23,12 @@
 
 | 任务 | GitHub issue | 阻塞任务 | 状态 |
 | --- | --- | --- | --- |
-| T14-01 | [#13：Lambda 与函数式接口基础（1—4 节）](https://github.com/Q1Xuan/java-se/issues/13) | 无 | 内容已整合，待最终审查；issue 开放 |
-| T14-02 | [#14：内置函数式接口（5—6 节）](https://github.com/Q1Xuan/java-se/issues/14) | 无 | 内容已整合，待最终审查；issue 开放 |
-| T14-03 | [#15：Lambda 练习与实际应用（7—8 节）](https://github.com/Q1Xuan/java-se/issues/15) | 无 | 内容已整合，待最终审查；issue 开放 |
-| T14-04 | [#16：方法引用与接收者（9—11 节）](https://github.com/Q1Xuan/java-se/issues/16) | 无 | 内容已整合，待最终审查；issue 开放 |
-| T14-05 | [#17：函数式接口组合与比较器（12—13 节）](https://github.com/Q1Xuan/java-se/issues/17) | 无 | 内容已整合，待最终审查；issue 开放 |
-| T14-06 | [#18：整合知识清单与覆盖验收](https://github.com/Q1Xuan/java-se/issues/18) | #13—#17 | 内容已整合，待最终审查；issue 开放 |
+| T14-01 | [#13：Lambda 与函数式接口基础（1—4 节）](https://github.com/Q1Xuan/java-se/issues/13) | 无 | 已完成，issue 已关闭 |
+| T14-02 | [#14：内置函数式接口（5—6 节）](https://github.com/Q1Xuan/java-se/issues/14) | 无 | 已完成，issue 已关闭 |
+| T14-03 | [#15：Lambda 练习与实际应用（7—8 节）](https://github.com/Q1Xuan/java-se/issues/15) | 无 | 已完成，issue 已关闭 |
+| T14-04 | [#16：方法引用与接收者（9—11 节）](https://github.com/Q1Xuan/java-se/issues/16) | 无 | 已完成，issue 已关闭 |
+| T14-05 | [#17：函数式接口组合与比较器（12—13 节）](https://github.com/Q1Xuan/java-se/issues/17) | 无 | 已完成，issue 已关闭 |
+| T14-06 | [#18：整合知识清单与覆盖验收](https://github.com/Q1Xuan/java-se/issues/18) | #13—#17 | 已完成，issue 已关闭 |
 
 六项均为 #12 的子任务，已标记 ready-for-agent；阻塞关系使用 GitHub 原生依赖。主题任务可以独立开始，每项包括资料核对、笔记和必要检查。
 
@@ -60,7 +60,7 @@
 | 11 | 抽象类与接口 | 待开始 |
 | 12 | 泛型、边界与比较器 | 待开始 |
 | 13 | 嵌套类、局部类与匿名类 | 首批样稿，见 #2—#6 |
-| 14 | Lambda、函数式接口与方法引用 | 已拆分任务，见 #12—#18 |
+| 14 | Lambda、函数式接口与方法引用 | 已完成，见 #12—#18 |
 | 15 | 集合框架：List、Set、Map | 待开始 |
 | 16 | 可变性、不可变性与 final | 待开始 |
 | 17 | Stream | 待开始 |
