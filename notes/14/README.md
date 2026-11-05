@@ -41,7 +41,28 @@ interface Enhanced<T> extends Comparator<T> {
 }
 ```
 
-匿名类还可以实现多个抽象方法或继承类；Lambda 的 `this` 指向外围对象，匿名类的 `this` 指向匿名类对象。参见[第 13 模块匿名类](../13/README.md#匿名类与比较器)。
+匿名类还可以实现多个抽象方法或继承类；Lambda 的 `this` 指向外围对象，匿名类的 `this` 指向匿名类对象：
+
+```java
+class ThisExample {
+    void show() {
+        Runnable lambda = () -> System.out.println((Object) this == ThisExample.this);
+        Runnable anonymous = new Runnable() {
+            public void run() {
+                System.out.println((Object) this == ThisExample.this);
+            }
+        };
+        lambda.run();    // true：this 是调用 show 的外围对象
+        anonymous.run(); // false：this 是匿名 Runnable 对象
+    }
+
+    public static void main(String[] args) {
+        new ThisExample().show();
+    }
+}
+```
+
+参见[第 13 模块匿名类](../13/README.md#匿名类与比较器)。
 
 ### 参数和方法体
 
@@ -67,18 +88,41 @@ Operation<Integer> sum = (x, y) -> { return x + y; };
 // Operation<Integer> bad = (x, y) -> System.out.println(x + y); // println 返回 void
 ```
 
-目标类型也可来自赋值或方法参数；单独的 Lambda 没有可供 `var` 推断的目标类型。例如 `var f = (String s) -> s.length();` 编译失败。Lambda 参数不能与外围方法的局部变量或参数同名；Lambda 块内声明的变量在块外不可见。
+目标类型也可来自赋值或方法参数；单独的 Lambda 没有可供 `var` 推断的目标类型。例如 `var f = (String s) -> s.length();` 编译失败。Lambda 参数不能与外围方法的局部变量或参数同名；Lambda 块内声明的变量在块外不可见：
+
+```java
+import java.util.function.Function;
+
+class ScopeExample {
+    public static void main(String[] args) {
+        int offset = 2;
+        // Function<Integer, Integer> bad = offset -> offset + 1; // 参数名与局部变量冲突
+        Function<Integer, Integer> addOffset = value -> {
+            int result = value + offset;
+            return result;
+        };
+        System.out.println(addOffset.apply(3)); // 5
+        // System.out.println(result); // result 只在 Lambda 块内可见
+    }
+}
+```
 
 ### 复用自定义操作
 
 ```java
-static <T> T calculate(Operation<T> op, T a, T b) {
-    return op.operate(a, b);
-}
+// 使用前面声明的 Operation 接口
+class CalculateExample {
+    static <T> T calculate(Operation<T> op, T a, T b) {
+        return op.operate(a, b);
+    }
 
-int total = calculate((a, b) -> a + b, 5, 2);       // 7
-Double quotient = calculate((a, b) -> a / b, 10.0, 2.5); // 4.0
-String joined = calculate((a, b) -> a.toUpperCase() + b.toUpperCase(), "a", "b"); // AB
+    public static void main(String[] args) {
+        int total = calculate((a, b) -> a + b, 5, 2);
+        Double quotient = calculate((a, b) -> a / b, 10.0, 2.5);
+        String joined = calculate((a, b) -> a.toUpperCase() + b.toUpperCase(), "a", "b");
+        System.out.println(total + ", " + quotient + ", " + joined); // 7, 4.0, AB
+    }
+}
 ```
 
 同一个方法接收不同操作；泛型使用包装类型（这里分别为 `Integer`、`Double`），基本类型参数可自动装箱，赋给 `int` 时拆箱。结果也必须与推断出的目标返回类型兼容。
