@@ -140,6 +140,7 @@ a.containsAll(intersection);           // true，判断是否包含全部
 NavigableSet<String> names = new TreeSet<>(); // String 的自然顺序
 names.addAll(List.of("Linus", "Daffy", "Charlie"));
 // 自定义类型可实现 Comparable，或者构造时传 Comparator
+record Contact(String name, String email) {}
 Comparator<Contact> byName = Comparator.comparing(Contact::name);
 NavigableSet<Contact> contacts = new TreeSet<>(byName);
 ```
