@@ -1,9 +1,5 @@
 # 第 13 模块：嵌套类
 
-本页覆盖静态嵌套类、成员内部类、局部类和匿名类。
-
-## 四种形式
-
 嵌套类是在另一个类或接口中声明的类：
 
 ```mermaid
@@ -17,36 +13,37 @@ flowchart TD
 
 这里的 `static` 包括隐式声明为静态；例如局部 `record` 和 `enum` 是静态的，不属于内部类。类、接口、枚举和记录都可以作为嵌套类型。
 
-## 静态嵌套类
+**变量捕获**，先理解成：小类用到了外面方法里的局部变量，就把它的值“记住”。
 
-用 `static class` 声明；创建时不需要 `Employee` 对象：
+因为 Java 的 `private` 边界，在这种嵌套结构里，是**最外层类**，不是里面每个小类各自的边界。这是 Java 规定的访问规则。[docs.oracle](https://docs.oracle.com/javase/specs/jls/se17/html/jls-6.html)
 
-```java
-class Employee {
-    private static String company = "Acme";
-    private int year = 2020;
-
-    static class Inspector {
-        private int marker = 1;
-
-        String company() { return Employee.company; } // 直接访问外部类的静态字段
-        int yearOf(Employee employee) { return employee.year; } // 通过对象访问实例字段
-        // int year() { return year; } // 错误：没有 Employee 对象
-    }
-
-    int markerOf(Inspector inspector) { return inspector.marker; } // 通过对象访问私有字段
-}
-
-class StaticExample {
-    public static void main(String[] args) {
-        Employee.Inspector inspector = new Employee.Inspector();
-        System.out.println(inspector.company());                  // Acme
-        System.out.println(inspector.yearOf(new Employee()));    // 2020
-    }
-}
+```
+javaclass Meal {             // ┌── 私有访问的大边界
+    class Item {             // │
+        private String name; // │
+    }                        // │
+                             // │
+    class Burger {           // │
+        // 可以访问 Item.name // │
+    }                        // │
+}                            // └──
 ```
 
-在外部使用 `Employee.Inspector` 时，仍须满足访问权限。
+
+
+## 静态嵌套类
+
+静态嵌套类不代表属性都是静态的，静态嵌套类中的非静态属性仍然需要创建静态嵌套类的对象来访问
+
+new 外部类名.内部类名()
+
+内部类访问外部类静态属性：外部类名.静态属性
+
+访问非静态属性：外部类对象.属性
+
+外部类访问内部类属性：内部类对象.属性
+
+
 
 例如，按入职年份排序时，静态嵌套比较器可以直接读取员工的私有字段：
 
@@ -83,7 +80,17 @@ Java 16 起内部类可以声明静态成员和静态初始化器；此前内部
 
 ## 成员内部类
 
-### 声明和创建
+内部类对象和外部类对象绑定，因为成员内部类属于对象本身
+
+内部类创建对象：外部类对象.new 内部类名()
+
+外部类的静态方法无法直接创建内部类对象，需要先有外部类对象
+
+在内部类，外部类属性重名，获取方式：
+
+内部类属性：this.属性名
+
+外部类属性：外部类名.this.属性名
 
 ```java
 class Meal {
@@ -96,54 +103,6 @@ class Meal {
     static Item createInStaticMethod(Meal meal) {
         // return new Item(); // 错误：静态方法没有当前 Meal 对象
         return meal.new Item(); // 提供一个 Meal 对象
-    }
-}
-```
-
-在其他类中创建：
-
-```java
-Meal meal = new Meal();
-Meal.Item item = meal.new Item(); // 外部类.内部类 对象名 = 外部对象.new 内部类();
-// Meal.Item item = new Meal.Item(); // 错误：缺少 Meal 对象
-```
-
-成员内部类可以使用 `public`、`protected`、`private` 或包访问权限；在外部使用时须满足对应权限。
-
-### 访问内外类的成员
-
-下面的 `Item` 关联一个 `Meal`。两个类都有 `price`，所以用 `this` 区分：
-
-```java
-class Meal {
-    private int price = 5;
-
-    class Item {
-        private int price = 2;
-
-        void printPrices() {
-            System.out.println(this.price);      // 2：Item 的 price
-            System.out.println(Meal.this.price); // 5：关联的 Meal 的私有 price
-        }
-    }
-
-    void printItemPrice(Item item) {
-        System.out.println(item.price); // 2：通过 Item 对象访问它的私有 price
-    }
-
-    static void printMealPrice(Meal meal) {
-        // System.out.println(price); // 错误：静态方法没有当前 Meal 对象
-        System.out.println(meal.price); // 5：通过提供的对象访问
-    }
-}
-
-class MemberExample {
-    public static void main(String[] args) {
-        Meal meal = new Meal();
-        Meal.Item item = meal.new Item();
-        item.printPrices();        // 依次输出 2、5
-        meal.printItemPrice(item); // 2
-        Meal.printMealPrice(meal); // 5
     }
 }
 ```
@@ -181,39 +140,6 @@ class Meal {
 
 这里 `Burger` 能通过 `Item` 引用访问 `name`，是因为它们都嵌套在 `Meal` 中；这不代表私有字段被继承。
 
-### 播放列表练习：静态嵌套类
-
-练习要求 `SongList` 声明为 `public static`。它包装歌曲集合，`Album` 通过对象调用它：
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-class Album {
-    public static class SongList {
-        private List<String> songs = new ArrayList<>();
-
-        void add(String title) { songs.add(title); }
-        boolean contains(String title) { return songs.contains(title); }
-    }
-
-    private SongList songs = new SongList();
-    void addSong(String title) { songs.add(title); }
-
-    public static void main(String[] args) {
-        Album album = new Album();
-        album.addSong("Yesterday");
-        System.out.println(album.songs.contains("Yesterday")); // true
-
-        Album.SongList list = new Album.SongList(); // 不需要 Album 对象
-        list.add("Hello");
-        System.out.println(list.contains("Hello")); // true
-    }
-}
-```
-
-`public static` 是这道题的评测要求；其他场景可根据是否需要外部对象选择静态嵌套类或成员内部类。
-
 ## 局部类与局部变量
 
 局部类在代码块中声明，类名从声明处起只在所在块内可用：
@@ -228,7 +154,11 @@ void show() {
 
 它可以继承类、实现接口，但不能声明访问权限修饰符或显式声明为 `static`。
 
-局部类可以访问外部对象的私有成员；捕获局部变量时，变量必须已赋值，且是 `final` 或 effectively final（没有写 `final`，但赋值情况符合 `final` 的要求）：
+补充一个边界：局部 `record`、`enum` 本身隐含为静态，但也不能显式加 `static`
+
+局部类可以访问外部对象的私有成员；捕获局部变量时，变量必须已赋值，且是 `final` 或 effectively final（没有写 `final`，但赋值情况符合 `final` 的要求，就是并没有改变那个局部变量的值，但是是允许改变的，只是改变了以后局部变量捕获就会报错，因为不再满足effectively final）：
+
+类名在自己的类体里面也有效，不是出了最后一个 `}` 才能使用。所以main方法在LocalExample中也能创建LocalExample
 
 ```java
 class LocalExample {
@@ -293,7 +223,12 @@ class Animal {
     void speak() { }
 }
 
-Animal cat = new Animal("Mimi") { // 调用 Animal 的构造器
+Animal cat = new Animal("Mimi") { 
+     // 实例初始化块：只有一对大括号，没有方法名
+    {
+        System.out.println("小猫准备好了");
+    }
+    // 调用 Animal 的构造器
     @Override void speak() { System.out.println("喵"); }
 };
 cat.speak(); // 喵
@@ -314,6 +249,7 @@ System.out.println(names); // [Bo, Lin, Ada]
 `compare(a, b)` 返回负数、零、正数，分别表示 `a` 排在前面、两者排序相等、`a` 排在后面。上面的 Lambda 是比较器的简写；`Comparable` 则由对象类型自己定义自然顺序。
 
 匿名类和 Lambda 的 `this` 也不同：
+Java 明确规定的：Lambda 里的 `this` 和外面含义相同；匿名内部类则有自己的 `this`。
 
 ```java
 class Demo {
