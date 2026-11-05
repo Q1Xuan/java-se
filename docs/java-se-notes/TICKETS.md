@@ -38,13 +38,13 @@
 
 | 任务 | GitHub issue | 阻塞任务 | 状态 |
 | --- | --- | --- | --- |
-| T15-01 | [#20：集合框架、Collections 与纸牌练习（1—8 节）](https://github.com/Q1Xuan/java-se/issues/20) | 无 | 内容已整合，待审查；issue 状态未核实 |
-| T15-02 | [#21：哈希、HashSet 与集合运算（9—14 节）](https://github.com/Q1Xuan/java-se/issues/21) | 无 | 内容已整合，待审查；issue 状态未核实 |
-| T15-03 | [#22：有序集合与座位练习（15—18 节）](https://github.com/Q1Xuan/java-se/issues/22) | 无 | 内容已整合，待审查；issue 状态未核实 |
-| T15-04 | [#23：Map 基础、更新方法与视图（19—21 节）](https://github.com/Q1Xuan/java-se/issues/23) | 无 | 内容已整合，待审查；issue 状态未核实 |
-| T15-05 | [#24：Map 练习、有序映射与枚举集合（22—26 节）](https://github.com/Q1Xuan/java-se/issues/24) | 无 | 内容已整合，待审查；issue 状态未核实 |
-| T15-06 | [#25：集合框架综合库存练习（27—29 节）](https://github.com/Q1Xuan/java-se/issues/25) | 无 | 内容已整合，待审查；issue 状态未核实 |
-| T15-07 | [#26：整合知识清单与覆盖验收](https://github.com/Q1Xuan/java-se/issues/26) | #20—#25 | 整合完成，待审查；issue 状态未核实 |
+| T15-01 | [#20：集合框架、Collections 与纸牌练习（1—8 节）](https://github.com/Q1Xuan/java-se/issues/20) | 无 | 已完成，issue 已关闭 |
+| T15-02 | [#21：哈希、HashSet 与集合运算（9—14 节）](https://github.com/Q1Xuan/java-se/issues/21) | 无 | 已完成，issue 已关闭 |
+| T15-03 | [#22：有序集合与座位练习（15—18 节）](https://github.com/Q1Xuan/java-se/issues/22) | 无 | 已完成，issue 已关闭 |
+| T15-04 | [#23：Map 基础、更新方法与视图（19—21 节）](https://github.com/Q1Xuan/java-se/issues/23) | 无 | 已完成，issue 已关闭 |
+| T15-05 | [#24：Map 练习、有序映射与枚举集合（22—26 节）](https://github.com/Q1Xuan/java-se/issues/24) | 无 | 已完成，issue 已关闭 |
+| T15-06 | [#25：集合框架综合库存练习（27—29 节）](https://github.com/Q1Xuan/java-se/issues/25) | 无 | 已完成，issue 已关闭 |
+| T15-07 | [#26：整合知识清单与覆盖验收](https://github.com/Q1Xuan/java-se/issues/26) | #20—#25 | 已完成，issue 已关闭 |
 
 七项均为 #19 的子任务并标记 ready-for-agent；整合任务的阻塞关系使用 GitHub 原生依赖。每项主题任务包含资料核对、笔记与必要检查。
 
@@ -77,7 +77,7 @@
 | 12 | 泛型、边界与比较器 | 待开始 |
 | 13 | 嵌套类、局部类与匿名类 | 首批样稿，见 #2—#6 |
 | 14 | Lambda、函数式接口与方法引用 | 已完成，见 #12—#18 |
-| 15 | 集合框架：List、Set、Map | 已整合，审查中，见 #19—#26 |
+| 15 | 集合框架：List、Set、Map | 已完成，见 #19—#26 |
 | 16 | 可变性、不可变性与 final | 待开始 |
 | 17 | Stream | 待开始 |
 | 18 | 数学、随机数、BigDecimal 与日期时间 | 待开始 |
